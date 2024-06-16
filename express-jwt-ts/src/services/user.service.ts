@@ -20,9 +20,9 @@ const createAccount = async (params: CreateAccountParams): Promise<User> => {
   });
 };
 
-const getUserByEmail = async <T extends keyof User>(
+const getUserByEmail = async <Key extends keyof User>(
   email: string,
-  selects: T[] = [
+  selects: Key[] = [
     "id",
     "email",
     "name",
@@ -31,15 +31,37 @@ const getUserByEmail = async <T extends keyof User>(
     "createdAt",
     "updatedAt",
     "isVerified",
-  ] as T[]
-): Promise<Pick<User, T> | null> => {
+  ] as Key[]
+): Promise<Pick<User, Key> | null> => {
   return prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
     select: selects.reduce(
-      (object, select) => ({ ...object, [select]: true }),
+      (key, value) => ({ ...key, [value]: true, email: true }),
       {}
     ),
-  }) as Promise<Pick<User, T> | null>;
+  }) as Promise<Pick<User, Key> | null>;
 };
 
-export default { createAccount };
+const getUserById = async <Key extends keyof User>(
+  id: number,
+  selects: Key[] = [
+    "id",
+    "email",
+    "name",
+    "password",
+    "role",
+    "createdAt",
+    "updatedAt",
+    "isVerified",
+  ] as Key[]
+): Promise<Pick<User, Key> | null> => {
+  return prisma.user.findUnique({
+    where: { id },
+    select: selects.reduce(
+      (key, value) => ({ ...key, [value]: true, email: true }),
+      {}
+    ),
+  }) as Promise<Pick<User, Key> | null>;
+};
+
+export default { createAccount, getUserByEmail, getUserById };
